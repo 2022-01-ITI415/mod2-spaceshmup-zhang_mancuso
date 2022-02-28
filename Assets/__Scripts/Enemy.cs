@@ -6,7 +6,7 @@ public class Enemy : MonoBehaviour {
 
     [Header("Set in Inspector: Enemy")]
     public float speed = 10f; // The speed in m/s
-    public float fireRate = 3.0f; // Seconds/shot (Unused)
+    public float fireRate = 0.5f; // Seconds/shot (Unused)
     public float health = 10;
     public int score = 100; // Points earned for destroying this
     public float showDamageDuration = 0.1f; // # seconds to show damage
@@ -34,6 +34,9 @@ public class Enemy : MonoBehaviour {
         {
             originalColors[i] = materials[i].color;
         }
+        InvokeRepeating("MakeProjectile", 2.0f, 4.0f);
+        InvokeRepeating("MakeProjectile", 2.3f, 4.0f);
+        InvokeRepeating("MakeProjectile", 2.6f, 4.0f);
     }
 
     // This is a property: A method that acts like a field
@@ -66,7 +69,7 @@ public class Enemy : MonoBehaviour {
         }
         if (time >= fireRate)
         {
-            MakeProjectile();
+            //MakeProjectile();
             time = 0.0f;
         }
     }
