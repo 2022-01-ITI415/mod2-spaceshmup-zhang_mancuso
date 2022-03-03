@@ -2,7 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+<<<<<<< Updated upstream
 public class Enemy : MonoBehaviour {
+=======
+public class Enemy : MonoBehaviour 
+{
+    static public Enemy S; // Singleton
+>>>>>>> Stashed changes
 
     [Header("Set in Inspector: Enemy")]
     public float speed = 10f; // The speed in m/s
@@ -20,6 +26,11 @@ public class Enemy : MonoBehaviour {
     public float damageDoneTime; // Time to stop showing damage
     public bool notifiedOfDestruction = false; // Will be used later
     public GameObject projectilePrefab;
+<<<<<<< Updated upstream
+=======
+    [SerializeField]
+    public float _shieldLevel = 1;
+>>>>>>> Stashed changes
 
     protected BoundsCheck bndCheck;
     private float time = 0.0f;
@@ -95,6 +106,13 @@ public class Enemy : MonoBehaviour {
                     break;
                 }
 
+                if (shieldLevel > 0)
+                {
+                    shieldLevel--;
+                    Destroy(otherGO);
+                    break;
+                }
+
                 // Hurt this Enemy
                 ShowDamage();
                 // Get the damage amount from the Main WEAP_DICT
@@ -149,4 +167,24 @@ public class Enemy : MonoBehaviour {
         p.rigid.velocity = new Vector3(0,-20,0);
         return p;
     }
+<<<<<<< Updated upstream
+=======
+
+    public float shieldLevel
+    {
+        get
+        {
+            return (_shieldLevel);
+        }
+        set
+        {
+            _shieldLevel = Mathf.Min(value, 2);
+            // If the shield is going to be set to less than zero
+            if (value < 0)
+            {
+                Destroy(this.gameObject);
+            }
+        }
+    }
+>>>>>>> Stashed changes
 }
