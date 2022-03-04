@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour {
+public class Enemy : MonoBehaviour 
+{
+    static public Enemy S; // Singleton
 
     [Header("Set in Inspector: Enemy")]
     public float speed = 10f; // The speed in m/s
@@ -20,9 +22,11 @@ public class Enemy : MonoBehaviour {
     public float damageDoneTime; // Time to stop showing damage
     public bool notifiedOfDestruction = false; // Will be used later
     public GameObject projectilePrefab;
+    [SerializeField]
+    public float _shieldLevel = 1;
 
     protected BoundsCheck bndCheck;
-    private float time = 0.0f;
+    private float time = 0.0f; 
 
     private void Awake()
     {
@@ -95,11 +99,19 @@ public class Enemy : MonoBehaviour {
                     break;
                 }
 
+                if (shieldLevel > 0)
+                //if (otherGO.tag == "ProjectileHero")
+                {
+                    shieldLevel--;
+                    Destroy(otherGO);
+
+                }
+
                 // Hurt this Enemy
                 ShowDamage();
                 // Get the damage amount from the Main WEAP_DICT
                 health -= Main.GetWeaponDefinition(p.type).damageOnHit;
-                if(health <= 0)
+                if (health <= 0)
                 {
                     // Tell the Main singleton that this ship was destroyed
                     if (!notifiedOfDestruction)
@@ -148,5 +160,23 @@ public class Enemy : MonoBehaviour {
         Projectile p = go.GetComponent<Projectile>();
         p.rigid.velocity = new Vector3(0,-20,0);
         return p;
+    }
+
+    public float shieldLevel
+    {
+        get
+        {
+            return (_shieldLevel);
+        }
+        set
+        {
+            _shieldLevel = Mathf.Min(value, 2);
+            // If the shield is going to be set to less than zero
+            if (value < 0)
+            {
+                GameObject shield = this.gameObject.transform.Find("Enemy_Shield").gameObject;
+                Destroy(shield);
+            }
+        }
     }
 }
