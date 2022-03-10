@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour {
+public class Enemy : MonoBehaviour 
+{
+    static public Enemy S; // Singleton
 
     [Header("Set in Inspector: Enemy")]
     public float speed = 10f; // The speed in m/s
-    public float fireRate = 0.3f; // Seconds/shot (Unused)
+    public float fireRate = 0.5f; // Seconds/shot (Unused)
     public float health = 10;
     public int score = 100; // Points earned for destroying this
     public float showDamageDuration = 0.1f; // # seconds to show damage
     public float powerUpDropChance = 1f; // Chance to drop a power-up
+ 
 
     [Header("Set Dynamically: Enemy")]
     public Color[] originalColors;
@@ -18,8 +21,12 @@ public class Enemy : MonoBehaviour {
     public bool showingDamage = false;
     public float damageDoneTime; // Time to stop showing damage
     public bool notifiedOfDestruction = false; // Will be used later
+    public GameObject projectilePrefab;
+    [SerializeField]
+    public float _shieldLevel = 1;
 
     protected BoundsCheck bndCheck;
+    private float time = 0.0f; 
 
     private void Awake()
     {
@@ -31,6 +38,9 @@ public class Enemy : MonoBehaviour {
         {
             originalColors[i] = materials[i].color;
         }
+        InvokeRepeating("MakeProjectile", 2.0f, 4.0f);
+        InvokeRepeating("MakeProjectile", 2.3f, 4.0f);
+        InvokeRepeating("MakeProjectile", 2.6f, 4.0f);
     }
 
     // This is a property: A method that acts like a field
@@ -48,6 +58,7 @@ public class Enemy : MonoBehaviour {
 
     void Update()
     {
+        time += Time.deltaTime;
         Move();
 
         if(showingDamage && Time.time > damageDoneTime)
@@ -59,6 +70,11 @@ public class Enemy : MonoBehaviour {
         {
             // We're off the bottom, so destroy this GameObject
             Destroy(gameObject);
+        }
+        if (time >= fireRate)
+        {
+            //MakeProjectile();
+            time = 0.0f;
         }
     }
 
@@ -83,11 +99,19 @@ public class Enemy : MonoBehaviour {
                     break;
                 }
 
+                if (shieldLevel > 0)
+                //if (otherGO.tag == "ProjectileHero")
+                {
+                    shieldLevel--;
+                    Destroy(otherGO);
+
+                }
+
                 // Hurt this Enemy
                 ShowDamage();
                 // Get the damage amount from the Main WEAP_DICT
                 health -= Main.GetWeaponDefinition(p.type).damageOnHit;
-                if(health <= 0)
+                if (health <= 0)
                 {
                     // Tell the Main singleton that this ship was destroyed
                     if (!notifiedOfDestruction)
@@ -124,5 +148,35 @@ public class Enemy : MonoBehaviour {
             materials[i].color = originalColors[i];
         }
         showingDamage = false;
+    }
+    public Projectile MakeProjectile()
+    {
+        GameObject go = Instantiate<GameObject>(projectilePrefab);
+        
+        go.tag = "ProjectileEnemy";
+        go.layer = LayerMask.NameToLayer("ProjectileEnemy");
+
+        go.transform.position = new Vector3(pos.x, pos.y - 5, pos.z);
+        Projectile p = go.GetComponent<Projectile>();
+        p.rigid.velocity = new Vector3(0,-20,0);
+        return p;
+    }
+
+    public float shieldLevel
+    {
+        get
+        {
+            return (_shieldLevel);
+        }
+        set
+        {
+            _shieldLevel = Mathf.Min(value, 2);
+            // If the shield is going to be set to less than zero
+            if (value < 0)
+            {
+                GameObject shield = this.gameObject.transform.Find("Enemy_Shield").gameObject;
+                Destroy(shield);
+            }
+        }
     }
 }
